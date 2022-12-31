@@ -2,8 +2,8 @@ import {ServiceBroker, Service as MoleculerService} from 'moleculer';
 import {Service, Action, Event, Method} from 'moleculer-decorators';
 import * as jwt from 'jsonwebtoken';
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
-let JWT_SECRET: any = process.env.JWT_SECRET;
-
+const JWT_SECRET = String(process.env.JWT_SECRET);
+const JWT_EXIRES_IN = String(process.env.JWT_EXIRES_IN)
 const E = require("moleculer-web").Errors;
 
 const settingsServiceBroker = {
@@ -39,22 +39,14 @@ class JwtService extends MoleculerService {
     //   return Promise.reject(new E.UnAuthorizedError(E.ERR_INVALID_TOKEN))
     // }
   }
-  // With options
-  // @Action({
-  //     cache: false,
-  //     params: {
-  //         a: "number",
-  //         b: "number"
-  //     }
-  // })
-  // Login2(ctx: any) {
-  //     //...
-  // }
-
-  // @Event()
-  // 'event.name'(payload: any, sender: any, eventName: any) {
-  //     //...
-  // }
+  @Action()
+  async generateAccessToken(ctx: any) {
+    return await jwt.sign({userId: ctx.params}, JWT_SECRET,
+      {
+        expiresIn: JWT_EXIRES_IN,
+      }
+    );
+  }
 
   @Method
   authorize(ctx: any, route: any, req: any, res: any) {
@@ -87,7 +79,6 @@ class JwtService extends MoleculerService {
 
   created() { // Reserved for moleculer, fired when created
     console.log("Created")
-    console.log(JWT_SECRET)
     //...
   }
 
