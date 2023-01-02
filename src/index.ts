@@ -32,12 +32,6 @@ class JwtService extends MoleculerService {
       return Promise.reject(new E.UnAuthorizedError(E.ERR_INVALID_TOKEN))
     }
 
-
-    // if (ctx.params.token == "123456") {
-    //   return Promise.resolve({id: 1, name: "John Doe"});
-    // } else {
-    //   return Promise.reject(new E.UnAuthorizedError(E.ERR_INVALID_TOKEN))
-    // }
   }
   @Action()
   async generateAccessToken(ctx: any) {
@@ -48,29 +42,29 @@ class JwtService extends MoleculerService {
     );
   }
 
-  @Method
-  authorize(ctx: any, route: any, req: any, res: any) {
-    let auth = req.headers["authorization"];
-    if (auth && auth.startsWith("Bearer")) {
-      let token = auth.slice(7);
+  // @Method
+  // authorize(ctx: any, route: any, req: any, res: any) {
+  //   let auth = req.headers["authorization"];
+  //   if (auth && auth.startsWith("Bearer")) {
+  //     let token = auth.slice(7);
 
-      // Check the token
-      if (token == "123456") {
-        // Set the authorized user entity to `ctx.meta`
-        ctx.meta.user = {id: 1, name: "John Doe"};
-        return Promise.resolve(ctx);
+  //     // Check the token
+  //     if (token == "123456") {
+  //       // Set the authorized user entity to `ctx.meta`
+  //       ctx.meta.user = {id: 1, name: "John Doe"};
+  //       return Promise.resolve(ctx);
 
-      } else {
-        // Invalid token
-        return Promise.reject(new E.UnAuthorizedError(E.ERR_INVALID_TOKEN));
-      }
+  //     } else {
+  //       // Invalid token
+  //       return Promise.reject(new E.UnAuthorizedError(E.ERR_INVALID_TOKEN));
+  //     }
 
-    } else {
-      // No token
-      return Promise.reject(new E.UnAuthorizedError(E.ERR_NO_TOKEN));
-    }
+  //   } else {
+  //     // No token
+  //     return Promise.reject(new E.UnAuthorizedError(E.ERR_NO_TOKEN));
+  //   }
 
-  }
+  // }
 
   started() { // Reserved for moleculer, fired when started
     console.log("Started!")
