@@ -1,10 +1,15 @@
 import {ServiceBroker, Service as MoleculerService} from 'moleculer';
 import {Service, Action, Event, Method} from 'moleculer-decorators';
-import * as jwt from 'jsonwebtoken';
-require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
+import * as jwt from "jsonwebtoken"
+import type {JwtPayload} from "jsonwebtoken"
+
+require('dotenv').config({path: `.env.${process.env.NODE_ENV}`});
 const JWT_SECRET = String(process.env.JWT_SECRET);
 const JWT_EXIRES_IN = String(process.env.JWT_EXIRES_IN)
+const REFRESH_JWT_SECRET = String(process.env.REFRESH_JWT_SECRET)
+const REFRESH_JWT_EXIRES_IN = String(process.env.REFRESH_JWT_EXIRES_IN)
 const E = require("moleculer-web").Errors;
+const tokenList: any = {}
 
 const settingsServiceBroker = {
   nodeID: "jwtauth-1",
@@ -23,7 +28,7 @@ class JwtService extends MoleculerService {
   async auth(ctx: any) {
     try {
 
-      const decoded: any = jwt.verify(ctx.params.token, JWT_SECRET);
+      const decoded: any = await jwt.verify(ctx.params.token, JWT_SECRET);
 
       if (decoded.exp < Date.now().valueOf() / 1000) {
         return Promise.reject(new E.UnAuthorizedError(E.ERR_INVALID_TOKEN))
@@ -35,11 +40,34 @@ class JwtService extends MoleculerService {
   }
   @Action()
   async generateAccessToken(ctx: any) {
-    return await jwt.sign({userId: ctx.params}, JWT_SECRET,
+    const user = {
+      email: ctx.params.email,
+      firstName: ctx.params.firstName,
+      lastName: ctx.params.lastName,
+      roles: ctx.params.roles
+    }
+    const token = jwt.sign({userId: ctx.params}, JWT_SECRET,
       {
         expiresIn: JWT_EXIRES_IN,
       }
     );
+    const refreshToken = jwt.sign(user, REFRESH_JWT_SECRET, {expiresIn: REFRESH_JWT_EXIRES_IN})
+    const result: JwtPayload = jwt.verify(token, JWT_SECRET) as JwtPayload
+
+    const response = {
+      status: "Logged in",
+      token: token,
+      refreshToken: refreshToken,
+      expiresIn: result.exp,
+    }
+
+    tokenList[user.email] = response
+
+    /*
+    await redis.setAsync(`${username}_access_token`, accessToken);
+    await redis.setAsync(`${username}_refresh_token`, refreshToken);
+    */
+    return response
   }
 
   // @Method
