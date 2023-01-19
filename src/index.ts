@@ -31,9 +31,11 @@ class JwtService extends MoleculerService {
       const decoded: any = await jwt.verify(ctx.params.token, JWT_SECRET);
 
       if (decoded.exp < Date.now().valueOf() / 1000) {
+        ctx.meta.$statusCode = 401;
         return Promise.reject(new E.UnAuthorizedError(E.ERR_INVALID_TOKEN))
       }
     } catch (err) {
+      ctx.meta.$statusCode = 401;
       return Promise.reject(new E.UnAuthorizedError(E.ERR_INVALID_TOKEN))
     }
 
